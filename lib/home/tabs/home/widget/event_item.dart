@@ -1,9 +1,12 @@
 import 'package:evently_app/model/event.dart';
+import 'package:evently_app/providers/event_list_provider.dart';
+import 'package:evently_app/providers/user_provider.dart';
 import 'package:evently_app/utils/app_assets.dart';
 import 'package:evently_app/utils/app_colors.dart';
 import 'package:evently_app/utils/app_styles.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class EventItem extends StatelessWidget {
   final Event event;
@@ -14,6 +17,8 @@ class EventItem extends StatelessWidget {
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var widht = MediaQuery.of(context).size.width;
+    var eventListProvider = Provider.of<EventListProvider>(context);
+    var userProvider = Provider.of<UserProvider>(context);
     return Container(
       height: height * 0.30,
       decoration: BoxDecoration(
@@ -70,9 +75,21 @@ class EventItem extends StatelessWidget {
                   Expanded(
                     child: Text(event.title, style: AppStyles.bold14Black),
                   ),
-                  Image.asset(
-                    AppAssets.iconFavoriteSelected,
-                    color: AppColors.primaryLight,
+                  InkWell(
+                    onTap: () {
+                      eventListProvider.updateIsFavoriteEvent(
+                          event, userProvider.currentUser!.id);
+                    },
+                    child: event.isFavorite == true ?
+                    Image.asset(
+                      AppAssets.iconFavoriteSelected,
+                      color: AppColors.primaryLight,
+                    )
+                        :
+                    Image.asset(
+                      AppAssets.iconFavorite,
+                      color: AppColors.primaryLight,
+                    ),
                   ),
                 ],
               ),

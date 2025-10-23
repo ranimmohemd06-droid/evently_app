@@ -10,6 +10,8 @@ import 'package:evently_app/utils/app_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../providers/user_provider.dart';
+
 class profileTab extends StatefulWidget {
   const profileTab({super.key});
 
@@ -24,6 +26,8 @@ class _profileTabState extends State<profileTab> {
     var width = MediaQuery.of(context).size.width;
     var languageProvider = Provider.of<AppLanguageProvider>(context);
     var themeProvider = Provider.of<AppThemeProvider>(context);
+    var userProvider = Provider.of<UserProvider>(context);
+
 
     return Scaffold(
       appBar: AppBar(
@@ -40,8 +44,10 @@ class _profileTabState extends State<profileTab> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Route Academy', style: AppStyles.bold16White),
-                  Text('route@gmail.com', style: AppStyles.medium16White),
+                  Text(userProvider.currentUser!.name,
+                      style: AppStyles.bold16White),
+                  Text(userProvider.currentUser!.email,
+                      style: AppStyles.medium16White),
                 ],
               ),
             ],

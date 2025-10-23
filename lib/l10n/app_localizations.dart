@@ -365,7 +365,7 @@ abstract class AppLocalizations {
   /// No description provided for @choose_event_location.
   ///
   /// In en, this message translates to:
-  /// **'Choose_Event_Location'**
+  /// **'Choose Event Location'**
   String get choose_event_location;
 
   /// No description provided for @add_event.
@@ -373,6 +373,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Event'**
   String get add_event;
+
+  /// No description provided for @no_favorite_event_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No Favorite Event Found'**
+  String get no_favorite_event_found;
+
+  /// No description provided for @no_event_found_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Event Found Yet'**
+  String get no_event_found_yet;
 }
 
 class _AppLocalizationsDelegate

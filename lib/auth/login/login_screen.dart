@@ -1,3 +1,4 @@
+import 'package:evently_app/firebase_utils.dart';
 import 'package:evently_app/home/widget/custom_elevated_bottom.dart';
 import 'package:evently_app/home/widget/custom_text_form_field.dart';
 import 'package:evently_app/l10n/app_localizations.dart';
@@ -5,8 +6,13 @@ import 'package:evently_app/utils/app_assets.dart';
 import 'package:evently_app/utils/app_colors.dart';
 import 'package:evently_app/utils/app_routes.dart';
 import 'package:evently_app/utils/app_styles.dart';
+import 'package:evently_app/utils/dialog_utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
@@ -24,8 +30,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery
+        .of(context)
+        .size
+        .height;
+    var width = MediaQuery
+        .of(context)
+        .size
+        .width;
 
     return Scaffold(
       body: SafeArea(
@@ -51,7 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         controller: emailController,
                         validator: (text) {
-                          if (text == null || text.trim().isEmpty) {
+                          if (text == null || text
+                              .trim()
+                              .isEmpty) {
                             return 'please enter email';
                           }
                           final bool emailValid = RegExp(
@@ -72,7 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscureText: true,
                         controller: passwordController,
                         validator: (text) {
-                          if (text == null || text.trim().isEmpty) {
+                          if (text == null || text
+                              .trim()
+                              .isEmpty) {
                             return 'please enter password';
                           }
                           return null;
@@ -177,9 +193,54 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void login() {
+  void login() async {
     if (formKey.currentState?.validate() == true) {
-      Navigator.of(context).pushReplacementNamed(AppRoutes.homeRouteName);
+      DialogUtils.showLoading(context: context, message: 'loading...');
+      print('email:${emailController.text}');
+      print(passwordController.text);
+      try {
+        final credential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text
+        );
+        // var user = await FirebaseUtils.readUserFromFireStore(credential.user?.uid??'');
+        // if (user==null){
+        //   return;
+        // }
+        // var userProvider= Provider.of<UserProvider>(context,listen: false);
+        // userProvider.updateUser(user);
+        DialogUtils.hideLoading(context: context);
+        DialogUtils.showMessage(context: context,
+            message: 'login successfully.',
+            title: 'success',
+            posActionName: 'ok',
+            postAction: () {
+              Navigator.of(context).pushReplacementNamed(
+                AppRoutes.homeRouteName,);
+            }
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'invalid-credential') {
+          DialogUtils.hideLoading(context: context);
+          DialogUtils.showMessage(context: context,
+            message: 'The supplied auth credential is incorrect... malformed or has expired.',
+            title: 'error',
+            posActionName: 'ok',
+
+
+          );
+        }
+      } catch (e) {
+        DialogUtils.hideLoading(context: context);
+        DialogUtils.showMessage(context: context,
+          message: e.toString(),
+          title: 'error',
+          posActionName: 'ok',
+
+
+        );
+      }
     }
   }
 }

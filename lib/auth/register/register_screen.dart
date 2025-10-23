@@ -1,11 +1,17 @@
+import 'package:evently_app/firebase_utils.dart';
 import 'package:evently_app/home/widget/custom_elevated_bottom.dart';
 import 'package:evently_app/home/widget/custom_text_form_field.dart';
 import 'package:evently_app/l10n/app_localizations.dart';
+import 'package:evently_app/model/my_user.dart';
 import 'package:evently_app/utils/app_assets.dart';
 import 'package:evently_app/utils/app_colors.dart';
 import 'package:evently_app/utils/app_styles.dart';
+import 'package:evently_app/utils/dialog_utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../providers/user_provider.dart';
 import '../../utils/app_routes.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -16,7 +22,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  TextEditingController nameController = TextEditingController();
+  /* TextEditingController nameController = TextEditingController();
 
   TextEditingController emailController = TextEditingController();
 
@@ -24,7 +30,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   TextEditingController repasswordController = TextEditingController();
 
+  */
+
   final formKey = GlobalKey<FormState>();
+  TextEditingController nameController
+  = TextEditingController(text: 'Ranim');
+  TextEditingController emailController
+  = TextEditingController(text: 'ranimmohamed@gmail.com');
+  TextEditingController passwordController
+  = TextEditingController(text: '123456');
+  TextEditingController repasswordController
+  = TextEditingController(text: '123456');
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -154,11 +173,80 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void register() {
+  void register() async {
     if (formKey.currentState?.validate() == true) {
-      Navigator.of(
-        context,
-      ).pushNamedAndRemoveUntil(AppRoutes.homeRouteName, (route) => false);
+      DialogUtils.showLoading(context: context, message: 'waiting...');
+      try {
+        final credential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+        MyUser myUser = MyUser(
+            id: credential.user?.uid ?? '',
+            name: nameController.text,
+            email: emailController.text
+        );
+        await FirebaseUtils.addUserToFirestore(MyUser(
+            id: credential.user?.uid ?? '',
+            name: nameController.text,
+            email: emailController.text)
+        );
+        await credential.user?.updateDisplayName(nameController.text);
+        var userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.updateUser(myUser);
+        DialogUtils.hideLoading(context: context);
+        DialogUtils.showMessage(context: context,
+            message: 'register successfully.',
+            title: 'success',
+            posActionName: 'ok',
+            postAction: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                AppRoutes.homeRouteName,
+                    (route) => false,);
+            }
+        );
+        print(credential.user?.uid ?? '');
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'weak-password') {
+          DialogUtils.hideLoading(context: context);
+          DialogUtils.showMessage(context: context,
+              message: 'The password provided is too weak..',
+              title: 'error.',
+              posActionName: 'ok',
+              postAction: () {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.homeRouteName,
+                      (route) => false,);
+              }
+          );
+        } else if (e.code == 'email-already-in-use') {
+          DialogUtils.hideLoading(context: context);
+          DialogUtils.showMessage(context: context,
+              message: 'The account already exists for that email.',
+              title: 'error.',
+              posActionName: 'ok',
+              postAction: () {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.homeRouteName,
+                      (route) => false,);
+              }
+          );
+        }
+      } catch (e) {
+        DialogUtils.hideLoading(context: context);
+        DialogUtils.showMessage(context: context,
+            message: e.toString(),
+            title: 'error.',
+            posActionName: 'ok',
+            postAction: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                AppRoutes.homeRouteName,
+                    (route) => false,);
+            }
+        );
+      }
+
     }
   }
 }

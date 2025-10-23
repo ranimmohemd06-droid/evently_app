@@ -5,15 +5,20 @@ import 'package:evently_app/home/widget/custom_elevated_bottom.dart';
 import 'package:evently_app/home/widget/custom_text_form_field.dart';
 import 'package:evently_app/l10n/app_localizations.dart';
 import 'package:evently_app/model/event.dart';
+import 'package:evently_app/providers/user_provider.dart';
 import 'package:evently_app/utils/app_assets.dart';
 import 'package:evently_app/utils/app_colors.dart';
 import 'package:evently_app/utils/app_styles.dart';
+import 'package:evently_app/utils/toast_utils.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart'; 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/event_list_provider.dart';
+import 'package:evently_app/utils/toast_utils.dart';
 
 class AddEvent extends StatefulWidget {
   AddEvent({super.key});
@@ -32,6 +37,8 @@ class _AddEventState extends State<AddEvent> {
   TimeOfDay? selectedTime;
   String formatTime = '';
   late EventListProvider eventListProvider;
+  late UserProvider userProvider;
+
 
   var formKey = GlobalKey<FormState>();
 
@@ -40,6 +47,9 @@ class _AddEventState extends State<AddEvent> {
   @override
   Widget build(BuildContext context) {
     eventListProvider = Provider.of<EventListProvider>(context);
+    userProvider = Provider.of<UserProvider>(context);
+
+
     var height = MediaQuery
         .of(context)
         .size
@@ -70,6 +80,8 @@ class _AddEventState extends State<AddEvent> {
       AppAssets.holidayImage,
       AppAssets.eatingImage,
     ];
+    selectedEventImage = eventImageList[selectedindex];
+    selectedEventName = eventsNameList[selectedindex];
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.transparentColor,
@@ -303,18 +315,27 @@ class _AddEventState extends State<AddEvent> {
         eventImage: selectedEventImage,
         eventTime: formatTime,
       );
-      FirebaseUtils.addEventToFireStore(event).timeout(
+      FirebaseUtils.addEventToFireStore(event, userProvider.currentUser!.id)
+          .then((value) {
+        ToastUtils.showToastMsg(message: 'Event added successfully',
+            backgroundColor: AppColors.primaryLight,
+            textColor: AppColors.whiteColor
+        );
+        Navigator.pop(context);
+      },)
+          .timeout(
         Duration(seconds: 1),
         onTimeout: () {
-          print('Event added succesfully.');
-          Navigator.pop(context);
+
         },
       );
     }
+  }
     @override
     void dispose() {
       super.dispose();
-      eventListProvider.getAllEvent();
+      var userProvider = Provider.of<UserProvider>(context, listen: false);
+      eventListProvider.getAllEvent(userProvider.currentUser!.id);
     }
   }
-}
+

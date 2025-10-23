@@ -142,8 +142,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get location => 'Location';
 
   @override
-  String get choose_event_location => 'Choose_Event_Location';
+  String get choose_event_location => 'Choose Event Location';
 
   @override
   String get add_event => 'Add Event';
+
+  @override
+  String get no_favorite_event_found => 'No Favorite Event Found';
+
+  @override
+  String get no_event_found_yet => 'No Event Found Yet';
 }

@@ -5,13 +5,12 @@ import 'package:evently_app/home/tabs/profile/profile_tab.dart';
 import 'package:evently_app/utils/app_assets.dart';
 import 'package:evently_app/utils/app_colors.dart';
 import 'package:evently_app/utils/app_routes.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,10 +18,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
-  List<Widget> tabList = [HomeTab(), MapTab(), FavoriteTab(), profileTab()];
+
+  // List<Widget> tabList = [HomeTab(), MapTab(), FavoriteTab(), profileTab()];
 
   @override
   Widget build(BuildContext context) {
+    final tabList = [HomeTab(), MapTab(), FavoriteTab(), profileTab()];
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,

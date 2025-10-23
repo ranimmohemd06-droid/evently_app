@@ -8,9 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/user_provider.dart';
 
 class HomeTab extends StatefulWidget {
-  HomeTab({super.key});
+  const HomeTab({super.key});
 
   @override
   State<HomeTab> createState() => _HomeTabState();
@@ -18,13 +19,14 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   late EventListProvider eventListProvider;
+  late UserProvider userProvider;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      eventListProvider.getAllEvent();
+      eventListProvider.getAllEvent(userProvider.currentUser!.id);
     });
   }
 
@@ -32,6 +34,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
     var widht = MediaQuery.of(context).size.width;
+    userProvider = Provider.of<UserProvider>(context);
     eventListProvider = Provider.of<EventListProvider>(context);
     eventListProvider.getEventNameList(context);
     /*if(eventListProvider.evenList.isEmpty){
@@ -53,7 +56,8 @@ class _HomeTabState extends State<HomeTab> {
                   AppLocalizations.of(context)!.welcome_back,
                   style: AppStyles.regular14White,
                 ),
-                Text('Route Academy', style: AppStyles.bold24White),
+                Text(userProvider.currentUser!.name,
+                    style: AppStyles.bold24White),
               ],
             ),
             Row(
@@ -105,7 +109,8 @@ class _HomeTabState extends State<HomeTab> {
                     length: eventListProvider.eventsNameList.length,
                     child: TabBar(
                       onTap: (index) {
-                        eventListProvider.changeSelectedIndex(index);
+                        eventListProvider.changeSelectedIndex(
+                            index, userProvider.currentUser!.id);
                       },
                       isScrollable: true,
                       labelPadding: EdgeInsets.zero,
@@ -140,7 +145,7 @@ class _HomeTabState extends State<HomeTab> {
             child: eventListProvider.filterEvenList.isEmpty
                 ? Center(
                     child: Text(
-                      AppLocalizations.of(context)!.add_event,
+                      AppLocalizations.of(context)!.no_event_found_yet,
                       style: Theme.of(context).textTheme.headlineLarge,
                     ),
                   )

@@ -43,6 +43,8 @@
   "choose_date": "Choose Date",
   "choose_time": "Choose Time",
   "location": "Location",
-  "choose_event_location": "Choose_Event_Location",
-  "add_event": "Add Event"
+  "choose_event_location": "Choose Event Location",
+  "add_event": "Add Event",
+  "no_favorite_event_found": "No Favorite Event Found",
+  "no_event_found_yet": "No Event Found Yet"
 }
